@@ -157,7 +157,7 @@
   </footer>
 
   <script>
-    const products = [
+    let products = [
       { id: 1, name: "Fone Bluetooth", category: "Eletrônicos", price: 49.90, icon: "🎧", seller: "Loja Exemplo" },
       { id: 2, name: "Relógio Casual", category: "Moda", price: 39.90, icon: "⌚", seller: "Moda Popular" },
       { id: 3, name: "Garrafa Térmica", category: "Casa", price: 34.90, icon: "🥤", seller: "Casa Prática" },
@@ -244,5 +244,57 @@
 
     renderProducts();
   </script>
+
+<script>
+const SUPABASE_URL = "https://aecjjfhknkbkvnslzcat.supabase.co";
+const SUPABASE_KEY = "sb_publishable_x2rx_q7Lvo4ImwWZG8zHTA_WnQUfVs7";
+
+async function carregarProdutosDoBanco() {
+  try {
+    const resposta = await fetch(
+      `${SUPABASE_URL}/rest/v1/products?select=*`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
+        }
+      }
+    );
+
+    if (!resposta.ok) {
+      console.error("Erro ao buscar produtos:", await resposta.text());
+      return;
+    }
+
+    const dados = await resposta.json();
+
+    if (dados.length > 0) {
+      products = dados.map(p => ({
+        id: p.id,
+        name: p.name,
+        category: p.category || "Outros",
+        price: Number(p.price) || 0,
+        icon: "📦",
+        seller: "Vendedor VEXO"
+      }));
+
+      const novasCategorias = ["Todos", ...new Set(products.map(p => p.category))];
+      document.getElementById("categories").innerHTML =
+        novasCategorias.map(category =>
+          `<button class="${category === "Todos" ? "active" : ""}"
+            onclick="selectCategory('${category}')">${category}</button>`
+        ).join("");
+
+      selectedCategory = "Todos";
+      renderProducts();
+    }
+  } catch (erro) {
+    console.error("Erro de conexão:", erro);
+  }
+}
+
+carregarProdutosDoBanco();
+</script>
+
 </body>
 </html>
