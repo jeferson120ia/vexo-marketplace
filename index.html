@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f97316">
+  <title>VEXO — Tudo em um só lugar</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+    header {
+      background: #f97316;
+      color: white;
+      padding: 18px 5%;
+    }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .logo { font-size: 30px; font-weight: 900; letter-spacing: 2px; }
+    .cart {
+      border: 0;
+      border-radius: 20px;
+      padding: 10px 14px;
+      font-weight: bold;
+      background: white;
+      color: #c2410c;
+    }
+    .search {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px;
+      border: 0;
+      border-radius: 9px;
+      font-size: 16px;
+    }
+    .hero {
+      margin: 20px auto;
+      width: 92%;
+      padding: 28px 22px;
+      border-radius: 16px;
+      color: white;
+      background: linear-gradient(120deg, #ea580c, #fb923c);
+    }
+    .hero h1 { font-size: 29px; margin: 0 0 10px; }
+    .hero p { line-height: 1.5; margin-bottom: 0; }
+    main { width: 92%; margin: auto; }
+    .categories {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 12px 0 20px;
+    }
+    .categories button {
+      border: 1px solid #ddd;
+      background: white;
+      padding: 11px 15px;
+      border-radius: 22px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .categories button.active {
+      background: #f97316;
+      color: white;
+      border-color: #f97316;
+    }
+    h2 { font-size: 21px; }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 13px;
+      padding-bottom: 30px;
+    }
+    .product {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px #0000000d;
+    }
+    .photo {
+      height: 130px;
+      display: grid;
+      place-items: center;
+      background: #fff0e5;
+      font-size: 48px;
+    }
+    .info { padding: 12px; }
+    .category { color: #777; font-size: 12px; }
+    .name { font-size: 14px; min-height: 35px; margin: 8px 0; }
+    .price { font-size: 20px; font-weight: bold; color: #ea580c; }
+    .seller { font-size: 12px; color: #666; margin-top: 7px; }
+    .add {
+      width: 100%;
+      padding: 10px 5px;
+      margin-top: 12px;
+      background: #f97316;
+      color: white;
+      border: 0;
+      border-radius: 7px;
+      font-weight: bold;
+    }
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 30px;
+      color: #666;
+    }
+    footer {
+      background: #222;
+      color: white;
+      text-align: center;
+      padding: 25px;
+      font-size: 13px;
+    }
+    @media (min-width: 700px) {
+      .products { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .photo { height: 180px; }
+      .hero h1 { font-size: 38px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top">
+      <div class="logo">VEXO</div>
+      <button class="cart" onclick="showCart()">🛒 Carrinho (<span id="count">0</span>)</button>
+    </div>
+    <input id="search" class="search" type="search"
+      placeholder="Buscar produtos na VEXO..."
+      oninput="renderProducts()">
+  </header>
+
+  <section class="hero">
+    <h1>Tudo o que você procura.</h1>
+    <p>Descubra ofertas, encontre novidades e conheça produtos de diferentes vendedores em um só lugar.</p>
+  </section>
+
+  <main>
+    <h2>Explore categorias</h2>
+    <div class="categories" id="categories"></div>
+    <h2>Produtos em destaque</h2>
+    <div class="products" id="products"></div>
+  </main>
+
+  <footer>
+    <strong>VEXO</strong>
+    <p>Tudo em um só lugar.</p>
+    <p>Versão inicial demonstrativa. Produtos e carrinho ainda não realizam compras reais.</p>
+  </footer>
+
+  <script>
+    const products = [
+      { id: 1, name: "Fone Bluetooth", category: "Eletrônicos", price: 49.90, icon: "🎧", seller: "Loja Exemplo" },
+      { id: 2, name: "Relógio Casual", category: "Moda", price: 39.90, icon: "⌚", seller: "Moda Popular" },
+      { id: 3, name: "Garrafa Térmica", category: "Casa", price: 34.90, icon: "🥤", seller: "Casa Prática" },
+      { id: 4, name: "Mochila Urbana", category: "Moda", price: 69.90, icon: "🎒", seller: "Mundo das Bolsas" },
+      { id: 5, name: "Luminária LED", category: "Casa", price: 29.90, icon: "💡", seller: "Casa Prática" },
+      { id: 6, name: "Kit de Skincare", category: "Beleza", price: 44.90, icon: "🧴", seller: "Beleza Exemplo" },
+      { id: 7, name: "Teclado Compacto", category: "Eletrônicos", price: 59.90, icon: "⌨️", seller: "Tech Exemplo" },
+      { id: 8, name: "Óculos de Sol", category: "Acessórios", price: 24.90, icon: "🕶️", seller: "Estilo Popular" }
+    ];
+
+    let selectedCategory = "Todos";
+    let cart = [];
+
+    const categories = ["Todos", ...new Set(products.map(p => p.category))];
+
+    document.getElementById("categories").innerHTML =
+      categories.map(category =>
+        `<button class="${category === selectedCategory ? "active" : ""}"
+          onclick="selectCategory('${category}')">${category}</button>`
+      ).join("");
+
+    function selectCategory(category) {
+      selectedCategory = category;
+      document.querySelectorAll(".categories button").forEach(button => {
+        button.classList.toggle("active", button.textContent === category);
+      });
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const query = document.getElementById("search").value.toLowerCase();
+      const filtered = products.filter(p =>
+        (selectedCategory === "Todos" || p.category === selectedCategory) &&
+        p.name.toLowerCase().includes(query)
+      );
+
+      document.getElementById("products").innerHTML = filtered.length
+        ? filtered.map(p => `
+          <article class="product">
+            <div class="photo">${p.icon}</div>
+            <div class="info">
+              <div class="category">${p.category}</div>
+              <div class="name">${p.name}</div>
+              <div class="price">${p.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</div>
+              <div class="seller">Vendido por ${p.seller}</div>
+              <button class="add" onclick="addToCart(${p.id})">Adicionar ao carrinho</button>
+            </div>
+          </article>
+        `).join("")
+        : '<div class="empty">Nenhum produto encontrado.</div>';
+    }
+
+    function addToCart(id) {
+      const item = cart.find(p => p.id === id);
+      if (item) item.quantity++;
+      else cart.push({ id, quantity: 1 });
+      updateCart();
+    }
+
+    function updateCart() {
+      document.getElementById("count").textContent =
+        cart.reduce((sum, item) => sum + item.quantity, 0);
+    }
+
+    function showCart() {
+      if (!cart.length) {
+        alert("Seu carrinho está vazio.");
+        return;
+      }
+
+      const details = cart.map(item => {
+        const p = products.find(product => product.id === item.id);
+        return `${p.name} x${item.quantity} — ${(p.price * item.quantity).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`;
+      }).join("\n");
+
+      const total = cart.reduce((sum, item) => {
+        const p = products.find(product => product.id === item.id);
+        return sum + p.price * item.quantity;
+      }, 0);
+
+      alert("Seu carrinho:\n\n" + details + "\n\nTotal: " +
+        total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }));
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
