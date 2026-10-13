@@ -297,5 +297,583 @@ async function carregarProdutosDoBanco() {
 carregarProdutosDoBanco();
 </script>
 
-</body>
-</html>
+<section id="vexo-vendedor" style="max-width:420px;margin:40px auto;padding:24px;background:#fff;color:#222;border-radius:16px;font-family:Arial,sans-serif;box-shadow:0 4px 20px #0002">
+  <h2 style="margin-top:0">Área do vendedor</h2>
+  <p>Entre na sua conta ou cadastre-se para começar.</p>
+
+  <label for="vexo-email">E-mail</label>
+  <input id="vexo-email" type="email" placeholder="seu@email.com" autocomplete="email"
+    style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px">
+
+  <label for="vexo-senha">Senha</label>
+  <input id="vexo-senha" type="password" placeholder="Mínimo de 6 caracteres" autocomplete="current-password"
+    style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px">
+
+  <button id="vexo-cadastrar" type="button"
+    style="width:100%;padding:12px;background:#f97316;color:white;border:0;border-radius:8px;font-weight:bold;margin-bottom:10px">
+    Criar conta de vendedor
+  </button>
+
+  <button id="vexo-entrar" type="button"
+    style="width:100%;padding:12px;background:#222;color:white;border:0;border-radius:8px;font-weight:bold">
+    Entrar
+  </button>
+
+  <button id="vexo-sair" type="button" hidden
+    style="width:100%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px">
+    Sair da conta
+  </button>
+
+  <p id="vexo-mensagem" role="status" aria-live="polite"></p>
+</section>
+
+<script>
+(() => {
+  const area = document.getElementById("vexo-vendedor");
+  if (!area || !window.supabase) return;
+
+  const cliente = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const email = document.getElementById("vexo-email");
+  const senha = document.getElementById("vexo-senha");
+  const mensagem = document.getElementById("vexo-mensagem");
+  const cadastrar = document.getElementById("vexo-cadastrar");
+  const entrar = document.getElementById("vexo-entrar");
+  const sair = document.getElementById("vexo-sair");
+
+  function avisar(texto) {
+    mensagem.textContent = texto;
+  }
+
+  cadastrar.addEventListener("click", async () => {
+    if (!email.value.trim() || senha.value.length < 6) {
+      avisar("Informe um e-mail válido e uma senha com pelo menos 6 caracteres.");
+      return;
+    }
+
+    cadastrar.disabled = true;
+    avisar("Criando sua conta...");
+
+    try {
+      const { data, error } = await cliente.auth.signUp({
+        email: email.value.trim(),
+        password: senha.value,
+        options: { emailRedirectTo: window.location.origin }
+      });
+
+      if (error) throw error;
+
+      avisar(
+        data.session
+          ? "Conta criada! Você já está conectado."
+          : "Cadastro iniciado! Confira seu e-mail para confirmar a conta."
+      );
+    } catch (erro) {
+      avisar("Não foi possível cadastrar: " + erro.message);
+    } finally {
+      cadastrar.disabled = false;
+    }
+  });
+
+  entrar.addEventListener("click", async () => {
+    if (!email.value.trim() || !senha.value) {
+      avisar("Preencha o e-mail e a senha.");
+      return;
+    }
+
+    entrar.disabled = true;
+    avisar("Entrando...");
+
+    try {
+      const { error } = await cliente.auth.signInWithPassword({
+        email: email.value.trim(),
+        password: senha.value
+      });
+
+      if (error) throw error;
+
+      avisar("Login realizado! Você está conectado à VEXO.");
+    } catch (erro) {
+      avisar("Não foi possível entrar: " + erro.message);
+    } finally {
+      entrar.disabled = false;
+    }
+  });
+
+  sair.addEventListener("click", async () => {
+    const { error } = await cliente.auth.signOut();
+    avisar(error ? "Erro ao sair: " + error.message : "Você saiu da sua conta.");
+  });
+
+  async function atualizarEstado() {
+    const { data } = await cliente.auth.getSession();
+    const conectado = Boolean(data.session);
+
+    sair.hidden = !conectado;
+    entrar.hidden = conectado;
+    cadastrar.hidden = conectado;
+
+    if (conectado) {
+      avisar("Conectado: " + data.session.user.email);
+    }
+  }
+
+  cliente.auth.onAuthStateChange(() => {
+    atualizarEstado();
+  });
+
+  atualizarEstado();
+})();
+</script>
+
+<section id="vexo-vendedor" style="max-width:420px;margin:40px auto;padding:24px;background:#fff;color:#222;border-radius:16px;font-family:Arial,sans-serif;box-shadow:0 4px 20px #0002">
+  <h2 style="margin-top:0">Área do vendedor</h2>
+  <p>Entre na sua conta ou cadastre-se para começar.</p>
+
+  <label for="vexo-email">E-mail</label>
+  <input id="vexo-email" type="email" placeholder="seu@email.com" autocomplete="email"
+    style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px">
+
+  <label for="vexo-senha">Senha</label>
+  <input id="vexo-senha" type="password" placeholder="Mínimo de 6 caracteres" autocomplete="current-password"
+    style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px">
+
+  <button id="vexo-cadastrar" type="button"
+    style="width:100%;padding:12px;background:#f97316;color:white;border:0;border-radius:8px;font-weight:bold;margin-bottom:10px">
+    Criar conta de vendedor
+  </button>
+
+  <button id="vexo-entrar" type="button"
+    style="width:100%;padding:12px;background:#222;color:white;border:0;border-radius:8px;font-weight:bold">
+    Entrar
+  </button>
+
+  <button id="vexo-sair" type="button" hidden
+    style="width:100%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px">
+    Sair da conta
+  </button>
+
+  <p id="vexo-mensagem" role="status" aria-live="polite"></p>
+</section>
+
+<script>
+(() => {
+  const area = document.getElementById("vexo-vendedor");
+  if (!area || !window.supabase) return;
+
+  const cliente = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const email = document.getElementById("vexo-email");
+  const senha = document.getElementById("vexo-senha");
+  const mensagem = document.getElementById("vexo-mensagem");
+  const cadastrar = document.getElementById("vexo-cadastrar");
+  const entrar = document.getElementById("vexo-entrar");
+  const sair = document.getElementById("vexo-sair");
+
+  function avisar(texto) {
+    mensagem.textContent = texto;
+  }
+
+  cadastrar.addEventListener("click", async () => {
+    if (!email.value.trim() || senha.value.length < 6) {
+      avisar("Informe um e-mail válido e uma senha com pelo menos 6 caracteres.");
+      return;
+    }
+
+    cadastrar.disabled = true;
+    avisar("Criando sua conta...");
+
+    try {
+      const { data, error } = await cliente.auth.signUp({
+        email: email.value.trim(),
+        password: senha.value,
+        options: { emailRedirectTo: window.location.origin }
+      });
+
+      if (error) throw error;
+
+      avisar(
+        data.session
+          ? "Conta criada! Você já está conectado."
+          : "Cadastro iniciado! Confira seu e-mail para confirmar a conta."
+      );
+    } catch (erro) {
+      avisar("Não foi possível cadastrar: " + erro.message);
+    } finally {
+      cadastrar.disabled = false;
+    }
+  });
+
+  entrar.addEventListener("click", async () => {
+    if (!email.value.trim() || !senha.value) {
+      avisar("Preencha o e-mail e a senha.");
+      return;
+    }
+
+    entrar.disabled = true;
+    avisar("Entrando...");
+
+    try {
+      const { error } = await cliente.auth.signInWithPassword({
+        email: email.value.trim(),
+        password: senha.value
+      });
+
+      if (error) throw error;
+
+      avisar("Login realizado! Você está conectado à VEXO.");
+    } catch (erro) {
+      avisar("Não foi possível entrar: " + erro.message);
+    } finally {
+      entrar.disabled = false;
+    }
+  });
+
+  sair.addEventListener("click", async () => {
+    const { error } = await cliente.auth.signOut();
+    avisar(error ? "Erro ao sair: " + error.message : "Você saiu da sua conta.");
+  });
+
+  async function atualizarEstado() {
+    const { data } = await cliente.auth.getSession();
+    const conectado = Boolean(data.session);
+
+    sair.hidden = !conectado;
+    entrar.hidden = conectado;
+    cadastrar.hidden = conectado;
+
+    if (conectado) {
+      avisar("Conectado: " + data.session.user.email);
+    }
+  }
+
+  cliente.auth.onAuthStateChange(() => {
+    atualizarEstado();
+  });
+
+  atualizarEstado();
+})();
+</script>
+
+<section id="vexo-vendedor" style="max-width:420px;margin:40px auto;padding:24px;background:#fff;color:#222;border-radius:16px;font-family:Arial,sans-serif;box-shadow:0 4px 20px #0002">
+  <h2 style="margin-top:0">Área do vendedor</h2>
+  <p>Entre na sua conta ou cadastre-se para começar.</p>
+
+  <label for="vexo-email">E-mail</label>
+  <input id="vexo-email" type="email" placeholder="seu@email.com" autocomplete="email"
+    style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px">
+
+  <label for="vexo-senha">Senha</label>
+  <input id="vexo-senha" type="password" placeholder="Mínimo de 6 caracteres" autocomplete="current-password"
+    style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px">
+
+  <button id="vexo-cadastrar" type="button"
+    style="width:100%;padding:12px;background:#f97316;color:white;border:0;border-radius:8px;font-weight:bold;margin-bottom:10px">
+    Criar conta de vendedor
+  </button>
+
+  <button id="vexo-entrar" type="button"
+    style="width:100%;padding:12px;background:#222;color:white;border:0;border-radius:8px;font-weight:bold">
+    Entrar
+  </button>
+
+  <button id="vexo-sair" type="button" hidden
+    style="width:100%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px">
+    Sair da conta
+  </button>
+
+  <p id="vexo-mensagem" role="status" aria-live="polite"></p>
+</section>
+
+<script>
+(() => {
+  const area = document.getElementById("vexo-vendedor");
+  if (!area || !window.supabase) return;
+
+  const cliente = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const email = document.getElementById("vexo-email");
+  const senha = document.getElementById("vexo-senha");
+  const mensagem = document.getElementById("vexo-mensagem");
+  const cadastrar = document.getElementById("vexo-cadastrar");
+  const entrar = document.getElementById("vexo-entrar");
+  const sair = document.getElementById("vexo-sair");
+
+  function avisar(texto) {
+    mensagem.textContent = texto;
+  }
+
+  cadastrar.addEventListener("click", async () => {
+    if (!email.value.trim() || senha.value.length < 6) {
+      avisar("Informe um e-mail válido e uma senha com pelo menos 6 caracteres.");
+      return;
+    }
+
+    cadastrar.disabled = true;
+    avisar("Criando sua conta...");
+
+    try {
+      const { data, error } = await cliente.auth.signUp({
+        email: email.value.trim(),
+        password: senha.value,
+        options: { emailRedirectTo: window.location.origin }
+      });
+
+      if (error) throw error;
+
+      avisar(
+        data.session
+          ? "Conta criada! Você já está conectado."
+          : "Cadastro iniciado! Confira seu e-mail para confirmar a conta."
+      );
+    } catch (erro) {
+      avisar("Não foi possível cadastrar: " + erro.message);
+    } finally {
+      cadastrar.disabled = false;
+    }
+  });
+
+  entrar.addEventListener("click", async () => {
+    if (!email.value.trim() || !senha.value) {
+      avisar("Preencha o e-mail e a senha.");
+      return;
+    }
+
+    entrar.disabled = true;
+    avisar("Entrando...");
+
+    try {
+      const { error } = await cliente.auth.signInWithPassword({
+        email: email.value.trim(),
+        password: senha.value
+      });
+
+      if (error) throw error;
+
+      avisar("Login realizado! Você está conectado à VEXO.");
+    } catch (erro) {
+      avisar("Não foi possível entrar: " + erro.message);
+    } finally {
+      entrar.disabled = false;
+    }
+  });
+
+  sair.addEventListener("click", async () => {
+    const { error } = await cliente.auth.signOut();
+    avisar(error ? "Erro ao sair: " + error.message : "Você saiu da sua conta.");
+  });
+
+  async function atualizarEstado() {
+    const { data } = await cliente.auth.getSession();
+    const conectado = Boolean(data.session);
+
+    sair.hidden = !conectado;
+    entrar.hidden = conectado;
+    cadastrar.hidden = conectado;
+
+    if (conectado) {
+      avisar("Conectado: " + data.session.user.email);
+    }
+  }
+
+  cliente.auth.onAuthStateChange(() => {
+    atualizarEstado();
+  });
+
+  atualizarEstado();
+})();
+</script>
+
+<section id="vexo-vendedor" style="max-width:420px;margin:40px auto;padding:24px;background:#fff;color:#222;border-radius:16px;font-family:Arial,sans-serif;box-shadow:0 4px 20px #0002">
+  <h2 style="margin-top:0">Área do vendedor</h2>
+  <p>Entre na sua conta ou cadastre-se para começar.</p>
+
+  <label for="vexo-email">E-mail</label>
+  <input id="vexo-email" type="email" placeholder="seu@email.com" autocomplete="email"
+    style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px">
+
+  <label for="vexo-senha">Senha</label>
+  <input id="vexo-senha" type="password" placeholder="Mínimo de 6 caracteres" autocomplete="current-password"
+    style="box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px;border:1px solid #ccc;border-radius:8px">
+
+  <button id="vexo-cadastrar" type="button"
+    style="width:100%;padding:12px;background:#f97316;color:white;border:0;border-radius:8px;font-weight:bold;margin-bottom:10px">
+    Criar conta de vendedor
+  </button>
+
+  <button id="vexo-entrar" type="button"
+    style="width:100%;padding:12px;background:#222;color:white;border:0;border-radius:8px;font-weight:bold">
+    Entrar
+  </button>
+
+  <button id="vexo-sair" type="button" hidden
+    style="width:100%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px">
+    Sair da conta
+  </button>
+
+  <p id="vexo-mensagem" role="status" aria-live="polite"></p>
+</section>
+
+<script>
+(() => {
+  const area = document.getElementById("vexo-vendedor");
+  if (!area || !window.supabase) return;
+
+  const cliente = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const email = document.getElementById("vexo-email");
+  const senha = document.getElementById("vexo-senha");
+  const mensagem = document.getElementById("vexo-mensagem");
+  const cadastrar = document.getElementById("vexo-cadastrar");
+  const entrar = document.getElementById("vexo-entrar");
+  const sair = document.getElementById("vexo-sair");
+
+  function avisar(texto) {
+    mensagem.textContent = texto;
+  }
+
+  cadastrar.addEventListener("click", async () => {
+    if (!email.value.trim() || senha.value.length < 6) {
+      avisar("Informe um e-mail válido e uma senha com pelo menos 6 caracteres.");
+      return;
+    }
+
+    cadastrar.disabled = true;
+    avisar("Criando sua conta...");
+
+    try {
+      const { data, error } = await cliente.auth.signUp({
+        email: email.value.trim(),
+        password: senha.value,
+        options: { emailRedirectTo: window.location.origin }
+      });
+
+      if (error) throw error;
+
+      avisar(
+        data.session
+          ? "Conta criada! Você já está conectado."
+          : "Cadastro iniciado! Confira seu e-mail para confirmar a conta."
+      );
+    } catch (erro) {
+      avisar("Não foi possível cadastrar: " + erro.message);
+    } finally {
+      cadastrar.disabled = false;
+    }
+  });
+
+  entrar.addEventListener("click", async () => {
+    if (!email.value.trim() || !senha.value) {
+      avisar("Preencha o e-mail e a senha.");
+      return;
+    }
+
+    entrar.disabled = true;
+    avisar("Entrando...");
+
+    try {
+      const { error } = await cliente.auth.signInWithPassword({
+        email: email.value.trim(),
+        password: senha.value
+      });
+
+      if (error) throw error;
+
+      avisar("Login realizado! Você está conectado à VEXO.");
+    } catch (erro) {
+      avisar("Não foi possível entrar: " + erro.message);
+    } finally {
+      entrar.disabled = false;
+    }
+  });
+
+  sair.addEventListener("click", async () => {
+    const { error } = await cliente.auth.signOut();
+    avisar(error ? "Erro ao sair: " + error.message : "Você saiu da sua conta.");
+  });
+
+  async function atualizarEstado() {
+    const { data } = await cliente.auth.getSession();
+    const conectado = Boolean(data.session);
+
+    sair.hidden = !conectado;
+    entrar.hidden = conectado;
+    cadastrar.hidden = conectado;
+
+    if (conectado) {
+      avisar("Conectado: " + data.session.user.email);
+    }
+  }
+
+  cliente.auth.onAuthStateChange(() => {
+    atualizarEstado();
+  });
+
+  atualizarEstado();
+})();
+</script>
+
+<section id="vexo-vendedor" style="max-width:420px;margin:30px auto;padding:20px;background:#fff;color:#222;border-radius:14px;font-family:Arial,sans-serif">
+  <h2>Área do vendedor</h2>
+  <p>Entre na sua conta ou crie seu cadastro na VEXO.</p>
+
+  <label for="vexo-email">E-mail</label>
+  <input id="vexo-email" type="email" placeholder="seu@email.com" style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px">
+
+  <label for="vexo-senha">Senha</label>
+  <input id="vexo-senha" type="password" placeholder="Sua senha" style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px">
+
+  <button id="vexo-cadastrar" type="button">Criar conta</button>
+  <button id="vexo-entrar" type="button">Entrar</button>
+  <p id="vexo-mensagem"></p>
+</section>
+
+<script>
+const vexoAuth = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const vexoEmail = document.getElementById("vexo-email");
+const vexoSenha = document.getElementById("vexo-senha");
+const vexoMensagem = document.getElementById("vexo-mensagem");
+
+document.getElementById("vexo-cadastrar").onclick = async () => {
+  const { data, error } = await vexoAuth.auth.signUp({
+    email: vexoEmail.value.trim(),
+    password: vexoSenha.value
+  });
+
+  vexoMensagem.textContent = error
+    ? error.message
+    : data.session
+      ? "Conta criada! Você já pode entrar."
+      : "Cadastro iniciado! Confira seu e-mail para confirmar.";
+};
+
+document.getElementById("vexo-entrar").onclick = async () => {
+  const { data, error } = await vexoAuth.auth.signInWithPassword({
+    email: vexoEmail.value.trim(),
+    password: vexoSenha.value
+  });
+
+  vexoMensagem.textContent = error
+    ? error.message
+    : "Login realizado com sucesso!";
+};
+</script>
+
+ </body>
+ </html>
